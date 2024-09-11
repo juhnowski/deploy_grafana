@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+buildMetadata: [managedByLabel]
+namespace: grafana
+
+resources:
+  - ../../base/grafana
+  - ./resources/service-alerting.yaml
+  - ../../base/postgres
+
+replicas:
+- name: grafana
+  count: 3
+
+patches:
+# Патчем тип pvc
+  - path: patch/pvc.yaml
+# Патчем антиафинити и стратегию апдейта
+  - path: patch/deployment-grafana.yaml
+
+configMapGenerator:
+  - envs:
+      - config/grafana_ha.env
+    name: grafana-env
+    behavior: merge
